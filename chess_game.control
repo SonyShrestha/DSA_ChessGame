@@ -1,0 +1,5 @@
+# chess_game extension
+comment = 'Chess Game - input/ouput functions for complex type'
+default_version = '1.0'
+module_pathname = '$libdir/chess_game'
+relocatable = true
