@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 CREATE OR REPLACE FUNCTION chess_board_in(cstring)
-  RETURNS chess_board  -- TODO: what type should be returned? int or chess_board?
+  RETURNS chess_board
   AS 'MODULE_PATHNAME'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
@@ -19,5 +19,5 @@ CREATE TYPE chess_board (
   internallength = 69, -- 69 is the length of the `board` type from `smallchesslib.h`
   input          = chess_board_in,
   output         = chess_board_out
-  -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, useful?
+  -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, is it useful?
 );
