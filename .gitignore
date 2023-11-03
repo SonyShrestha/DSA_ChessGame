@@ -1,5 +1,8 @@
+# editor files
 .vscode
 .idea
 
-chess_game.o
-chess_game.so
+# build files
+*.o
+*.out
+*.so
