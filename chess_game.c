@@ -20,7 +20,7 @@ Datum chess_board_in(PG_FUNCTION_ARGS)
 
     SCL_Board *board = palloc(sizeof(SCL_Board));
 
-    if (SCL_boardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") == 0)
+    if (SCL_boardFromFEN(board, str) == 0)
         ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("invalid board state")));
 
     PG_FREE_IF_COPY(str, 0);
