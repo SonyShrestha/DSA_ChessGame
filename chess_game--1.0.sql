@@ -1,10 +1,9 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
-\echo Use "CREATE EXTENSION chess_board" to load this file. \quit
+\echo Use "CREATE EXTENSION chess_game" to load this file. \quit
 
 /******************************************************************************
  * Input/Output
  ******************************************************************************/
-
 
 
 CREATE OR REPLACE FUNCTION chess_board_in(cstring)
