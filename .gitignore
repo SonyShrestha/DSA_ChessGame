@@ -1,3 +1,5 @@
 .vscode
+.idea
+
 chess_game.o
 chess_game.so
