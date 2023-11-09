@@ -44,6 +44,8 @@ Datum chess_game_in(PG_FUNCTION_ARGS)
 
     PG_FREE_IF_COPY(str, 0);
     PG_RETURN_GAME_P(record);
+    
+    
 }
 
 
@@ -64,6 +66,7 @@ Datum chess_board_out(PG_FUNCTION_ARGS)
 char str[4096];
 void putCharStr(char c)
 {
+    
     char* s = str;
 
     while (*s != 0)
@@ -75,18 +78,18 @@ void putCharStr(char c)
 
 PG_FUNCTION_INFO_V1(chess_game_out);
 Datum chess_game_out(PG_FUNCTION_ARGS)
-{
-    
+{    
     char* game = palloc(sizeof(char)*4096);
 
     SCL_Record* record = PG_GETARG_GAME_P(0);    
     SCL_printPGN(record, putCharStr, 0);
-
     for(int i = 0; i < 4096; i++) {
         game[i] = str[i]; 
     }
    
+    str[0] = '\0';
     // game = str[4096];
     PG_RETURN_CSTRING(game);
+    
 
 }
