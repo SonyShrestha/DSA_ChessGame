@@ -83,7 +83,7 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
     SCL_printPGN(record, putCharStr, 0);
 
     for(int i = 0; i < 4096; i++) {
-        game = str[i];
+        game[i] = str[i]; 
     }
    
     // game = str[4096];
