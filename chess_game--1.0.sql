@@ -21,3 +21,21 @@ CREATE TYPE chess_board (
   output         = chess_board_out
   -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, is it useful?
 );
+
+
+CREATE OR REPLACE FUNCTION chess_game_in(cstring)
+  RETURNS chess_game
+  AS 'MODULE_PATHNAME'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE OR REPLACE FUNCTION chess_game_out(chess_game)
+  RETURNS cstring
+  AS 'MODULE_PATHNAME'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE TYPE chess_game (
+  internallength = 4096, -- 69 is the length of the `board` type from `smallchesslib.h`
+  input          = chess_game_in,
+  output         = chess_game_out
+  -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, is it useful?
+);
