@@ -119,3 +119,73 @@ Datum getBoard(PG_FUNCTION_ARGS)
 
     PG_RETURN_BOARD_P(board);
 }
+
+void truncate_pgn_internal(char *chess_notation, int n, char *result_board)
+{
+    int idx = 0;
+
+    while (1)
+    {
+        char c = chess_notation[idx];
+        if (c == '\0')
+        {
+            break;
+        }
+
+        if (c == '.')
+        {
+            char next_char = chess_notation[idx + 1];
+            if (next_char == ' ')
+            {
+                int move_number = 0;
+                int digit_idx = idx - 1;
+
+                int prev_space_idx = -1;
+
+                while (digit_idx >= 0)
+                {
+                    char c = chess_notation[digit_idx];
+                    if (c == ' ')
+                    {
+                        prev_space_idx = digit_idx;
+                        break;
+                    }
+
+                    int digit = c - '0';
+
+                    move_number += (digit * pow(10, idx - 1 - digit_idx));
+
+                    digit_idx--;
+                }
+
+                if (move_number > n)
+                {
+                    result_board[prev_space_idx] = '\0';
+                    break;
+                }
+            }
+        }
+
+        result_board[idx] = c;
+        idx++;
+    }
+
+    result_board[idx] = '\0';
+}
+
+PG_FUNCTION_INFO_V1(getFirstMoves);
+Datum getFirstMoves(PG_FUNCTION_ARGS)
+{
+    SCL_Record *record = PG_GETARG_GAME_P(0);
+    int half_move = PG_GETARG_INT32(1);
+
+    // we have input a record
+    // transform this to string
+
+    // truncate takes string and returns string
+
+    // transform truncate's output from string to record
+    // output should be record
+
+    PG_RETURN_GAME_P(record);
+}
