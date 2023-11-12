@@ -56,7 +56,7 @@ CREATE FUNCTION getBoard(chess_game, integer)
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
-      CREATE FUNCTION hasBoard(chess_game,integer)
-  RETURNS chess_board
+CREATE FUNCTION hasBoard(chess_game, chess_board,integer)
+  RETURNS boolean
   AS 'MODULE_PATHNAME', 'hasBoard'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
