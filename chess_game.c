@@ -200,3 +200,30 @@ Datum getFirstMoves(PG_FUNCTION_ARGS)
     SCL_recordFromPGN(output_record, result_pgn);
     PG_RETURN_GAME_P(output_record);
 }
+
+
+int compare_strings(char* str1, char* str2) {
+    // Check if str1 starts with str2
+    if (strncmp(str2, str1, strlen(str2)) == 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+PG_FUNCTION_INFO_V1(hasOpening);
+Datum hasOpening(PG_FUNCTION_ARGS)
+{
+    SCL_Record* record1 = PG_GETARG_GAME_P(0);
+    SCL_Record* record2 = PG_GETARG_GAME_P(1);
+    char* chess_game_str1;
+    char* chess_game_str2;
+    int result;
+
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2);
+
+    PG_RETURN_INT32(result);
+}
