@@ -20,9 +20,9 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(chess_board_in);
 Datum chess_board_in(PG_FUNCTION_ARGS)
 {
-    char *str = PG_GETARG_CSTRING(0);
+    char* str = PG_GETARG_CSTRING(0);
 
-    SCL_Board *board = palloc(sizeof(SCL_Board));
+    SCL_Board* board = palloc(sizeof(SCL_Board));
 
     if (SCL_boardFromFEN(board, str) == 0)
         ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("invalid board state")));
@@ -34,9 +34,9 @@ Datum chess_board_in(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_in);
 Datum chess_game_in(PG_FUNCTION_ARGS)
 {
-    char *str = PG_GETARG_CSTRING(0);
+    char* str = PG_GETARG_CSTRING(0);
 
-    SCL_Record *record = palloc(sizeof(SCL_Record));
+    SCL_Record* record = palloc(sizeof(SCL_Record));
 
     SCL_recordFromPGN(record, str);
 
@@ -47,7 +47,7 @@ Datum chess_game_in(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_board_out);
 Datum chess_board_out(PG_FUNCTION_ARGS)
 {
-    SCL_Board *board = PG_GETARG_BOARD_P(0);
+    SCL_Board* board = PG_GETARG_BOARD_P(0);
 
     char str[256];
 
@@ -61,7 +61,7 @@ char str[4096];
 void putCharStr(char c)
 {
 
-    char *s = str;
+    char* s = str;
 
     while (*s != 0)
         s++;
@@ -70,12 +70,25 @@ void putCharStr(char c)
     *(s + 1) = 0;
 }
 
+char* chess_game_to_str(SCL_Record record) {
+    char* game = palloc(sizeof(char) * 4096);
+    SCL_printPGN(record, putCharStr, 0);
+    for (int i = 0; i < 4096; i++)
+    {
+        game[i] = str[i];
+    }
+
+    str[0] = '\0';
+    // game = str[4096];
+    return game;
+}
+
 PG_FUNCTION_INFO_V1(chess_game_out);
 Datum chess_game_out(PG_FUNCTION_ARGS)
 {
-    char *game = palloc(sizeof(char) * 4096);
+    char* game = palloc(sizeof(char) * 4096);
 
-    SCL_Record *record = PG_GETARG_GAME_P(0);
+    SCL_Record* record = PG_GETARG_GAME_P(0);
     SCL_printPGN(record, putCharStr, 0);
     for (int i = 0; i < 4096; i++)
     {
@@ -88,12 +101,12 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
 }
 
 // TODO: probably there's something simpler to get the initial board from smallchesslib
-SCL_Board *get_starting_board()
+SCL_Board* get_starting_board()
 {
-    SCL_Board *board = malloc(sizeof(SCL_Board));
-    char *str = malloc(sizeof(char) * 256);
+    SCL_Board* board = malloc(sizeof(SCL_Board));
+    char* str = malloc(sizeof(char) * 256);
 
-    strcpy(str, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    strcpy_s(str, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",sizeof("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
 
     SCL_boardFromFEN(board, str);
     free(str);
@@ -101,9 +114,9 @@ SCL_Board *get_starting_board()
     return board;
 }
 
-SCL_Board *get_board_internal(SCL_Record record, int half_moves)
+SCL_Board* get_board_internal(SCL_Record record, int half_moves)
 {
-    SCL_Board *board = get_starting_board();
+    SCL_Board* board = get_starting_board();
     SCL_recordApply(record, board, half_moves);
 
     return board;
@@ -112,15 +125,15 @@ SCL_Board *get_board_internal(SCL_Record record, int half_moves)
 PG_FUNCTION_INFO_V1(getBoard);
 Datum getBoard(PG_FUNCTION_ARGS)
 {
-    SCL_Record *record = PG_GETARG_GAME_P(0);
+    SCL_Record* record = PG_GETARG_GAME_P(0);
     int half_move = PG_GETARG_INT32(1);
 
-    SCL_Board *board = get_board_internal(*record, half_move);
+    SCL_Board* board = get_board_internal(*record, half_move);
 
     PG_RETURN_BOARD_P(board);
 }
 
-void truncate_pgn_internal(char *chess_notation, int n, char *result_board)
+void truncate_pgn_internal(char* chess_notation, int n, char* result_board)
 {
     int idx = 0;
 
@@ -176,16 +189,14 @@ void truncate_pgn_internal(char *chess_notation, int n, char *result_board)
 PG_FUNCTION_INFO_V1(getFirstMoves);
 Datum getFirstMoves(PG_FUNCTION_ARGS)
 {
-    SCL_Record *record = PG_GETARG_GAME_P(0);
+    SCL_Record* record = PG_GETARG_GAME_P(0);
     int half_move = PG_GETARG_INT32(1);
+    char* chess_game_str;
+    char result_pgn[256];
+    SCL_Record* output_record = palloc(sizeof(SCL_Record));
 
-    // we have input a record
-    // transform this to string
-
-    // truncate takes string and returns string
-
-    // transform truncate's output from string to record
-    // output should be record
-
-    PG_RETURN_GAME_P(record);
+    chess_game_str= chess_game_to_str(record);
+    truncate_pgn_internal(chess_game_str, half_move, result_pgn);
+    SCL_recordFromPGN(output_record, result_pgn);
+    PG_RETURN_GAME_P(output_record);
 }

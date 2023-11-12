@@ -44,3 +44,8 @@ CREATE FUNCTION getBoard(chess_game, integer)
   RETURNS chess_board
   AS 'MODULE_PATHNAME', 'getBoard'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+  CREATE FUNCTION getFirstMoves(chess_game, integer)
+  RETURNS chess_game
+  AS 'MODULE_PATHNAME', 'getFirstMoves'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
