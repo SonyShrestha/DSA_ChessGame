@@ -207,11 +207,11 @@ int compare_strings(char *str1, char *str2)
     // Check if str1 starts with str2
     if (strncmp(str1, str2, strlen(str2) - 1) == 0)
     {
-        return 1;
+        return true;
     }
     else
     {
-        return 0;
+        return false;
     }
 }
 
@@ -222,13 +222,13 @@ Datum hasOpening(PG_FUNCTION_ARGS)
     SCL_Record *record2 = PG_GETARG_GAME_P(1);
     char *chess_game_str1;
     char *chess_game_str2;
-    int result;
+    bool result;
 
     chess_game_str1 = chess_game_to_str(record1);
     chess_game_str2 = chess_game_to_str(record2);
     result = compare_strings(chess_game_str1, chess_game_str2);
 
-    PG_RETURN_INT32(result);
+    PG_RETURN_BOOL(result);
 }
 
 PG_FUNCTION_INFO_V1(hasBoard);
