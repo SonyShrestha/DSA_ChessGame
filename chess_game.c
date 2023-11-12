@@ -109,7 +109,6 @@ SCL_Board *get_board_internal(SCL_Record record, int half_moves)
     return board;
 }
 
-// ideally: getBoard(chessgame, integer) -> chessboard:
 PG_FUNCTION_INFO_V1(getBoard);
 Datum getBoard(PG_FUNCTION_ARGS)
 {
