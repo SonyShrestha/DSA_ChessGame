@@ -103,8 +103,8 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
 // TODO: probably there's something simpler to get the initial board from smallchesslib
 SCL_Board* get_starting_board()
 {
-    SCL_Board* board = malloc(sizeof(SCL_Board));
-    char* str = malloc(sizeof(char) * 256);
+    SCL_Board* board = palloc(sizeof(SCL_Board));
+    char* str = palloc(sizeof(char) * 256);
 
     strcpy_s(str, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",sizeof("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
 
@@ -204,7 +204,7 @@ Datum getFirstMoves(PG_FUNCTION_ARGS)
 
 int compare_strings(char* str1, char* str2) {
     // Check if str1 starts with str2
-    if (strncmp(str2, str1, strlen(str2)) == 0) {
+    if (strncmp(str1, str2, strlen(str2)-1) == 0) {
         return 1;
     }
     else {
@@ -226,4 +226,22 @@ Datum hasOpening(PG_FUNCTION_ARGS)
     result = compare_strings(chess_game_str1, chess_game_str2);
 
     PG_RETURN_INT32(result);
+}
+
+
+
+PG_FUNCTION_INFO_V1(hasBoard);
+Datum hasBoard(PG_FUNCTION_ARGS)
+{
+    SCL_Record* record = PG_GETARG_GAME_P(0);
+   // SCL_Board* board = PG_GETARG_BOARD_P(1);
+    int half_move = PG_GETARG_INT32(1);
+
+    SCL_Board* board2 = get_board_internal(*record, half_move);
+
+    //int result;
+
+    //result=SCL_boardsDiffer(*result_board_state, *board);
+
+    PG_RETURN_BOARD_P(board2);
 }
