@@ -101,9 +101,9 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
     PG_RETURN_CSTRING(game);
 }
 
-// TODO: probably there's something simpler to get the initial board from smallchesslib
 SCL_Board *get_starting_board()
 {
+    // TODO: should we use `palloc` for the `board`? since it's being freed by postgres
     SCL_Board *board = malloc(sizeof(SCL_Board));
     char *str = malloc(sizeof(char) * 256);
 
@@ -204,7 +204,7 @@ Datum getFirstMoves(PG_FUNCTION_ARGS)
 
 int compare_strings(char *str1, char *str2)
 {
-    // Check if str1 starts with str2
+    // Check if str1 starts with str2 (ignoring the last character because it's an added *)
     if (strncmp(str1, str2, strlen(str2) - 1) == 0)
     {
         return true;
@@ -238,7 +238,7 @@ Datum hasBoard(PG_FUNCTION_ARGS)
     SCL_Board *board = PG_GETARG_BOARD_P(1);
     int half_move = PG_GETARG_INT32(2);
 
-    for (int i = 0; i < half_move; i++)
+    for (int i = 0; i <= half_move; i++)
     {
         SCL_Board *result_board_state = get_board_internal(*record, i);
         if (SCL_boardsDiffer(*result_board_state, *board) == 0)
