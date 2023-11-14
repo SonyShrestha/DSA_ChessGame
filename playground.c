@@ -44,6 +44,7 @@ void print_board(SCL_Board *board)
         4,
         1,
         0);
+
     char str_board[256];
     SCL_boardToFEN(board, str_board);
 
@@ -109,40 +110,21 @@ void truncate_pgn(char *chess_notation, int n, char *result_board)
 
 int main()
 {
-    char *initial_pgn = "1. c4 Nf6 2. Nc3 c6 3. d4 d5 4. e3 g6 5. Nf3 Bg7 6. h3 O-O 7. Bd3 c5";
+    char pgn[] = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. d3";
     SCL_Record *record = malloc(sizeof(SCL_Record));
-    SCL_recordFromPGN(record, initial_pgn);
+    SCL_recordFromPGN(record, pgn);
 
-    char str[256];
+    SCL_Board board;
+    SCL_recordApply(record, board, 2);
 
-    SCL_Board board = SCL_BOARD_START_STATE;
-    SCL_boardToFEN(&board, str);
-    printf("%s\n", str);
+    SCL_SquareSet emptySquareSet = SCL_SQUARE_SET_EMPTY;
+    SCL_printBoard(board, putCharacter, emptySquareSet, 255, SCL_PRINT_FORMAT_UTF8, 4, 1, 0);
 
-    // get the board after 1 move
-    SCL_Board *board1 = getBoard(record, 1);
-    SCL_boardToFEN(board1, str);
-    printf("%s\n", str);
-    free(board1);
+    char fen[256];
+    SCL_boardToFEN(&board, fen);
+    printf("%s\n", fen);
 
-    // get the board after 2 moves
-    SCL_Board *board2 = getBoard(record, 2);
-    SCL_boardToFEN(board2, str);
-    printf("%s\n", str);
-    free(board2);
-
-    // get the board after 3 moves
-    SCL_Board *board3 = getBoard(record, 3);
-    SCL_boardToFEN(board3, str);
-    printf("%s\n", str);
-    free(board3);
-
-    /**
-     * rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-     * rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1
-     * rnbqkb1r/pppppppp/5n2/8/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 1 2
-     * rnbqkb1r/pppppppp/5n2/8/2P5/2N5/PP1PPPPP/R1BQKBNR b KQkq - 2 2
-     */
+    free(record);
 
     return 0;
 }
