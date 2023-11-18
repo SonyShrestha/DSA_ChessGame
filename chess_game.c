@@ -249,6 +249,9 @@ Datum hasBoard(PG_FUNCTION_ARGS)
     for (int i = 0; i <= half_move; i++)
     {
         SCL_Board *result_board_state = get_board_internal(*record, i);
+
+        // TODO: SCL_boardsDiffer does not ignore the things after the board state
+        // is there a function that does that? if not we can do our own?
         if (SCL_boardsDiffer(*result_board_state, *board) == 0)
         {
             PG_RETURN_BOOL(true);
