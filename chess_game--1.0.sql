@@ -60,3 +60,85 @@ CREATE FUNCTION hasBoard(chess_game, chess_board,integer)
   RETURNS boolean
   AS 'MODULE_PATHNAME', 'hasBoard'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE FUNCTION chess_game_lt(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_game_lt'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE FUNCTION chess_game_le(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_game_le'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chess_game_eq(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_game_eq'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE FUNCTION chess_game_gt(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_game_gt'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+
+CREATE FUNCTION chess_game_ge(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_game_ge'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE OPERATOR = (
+  LEFTARG  = chess_game,
+  RIGHTARG = chess_game,
+  PROCEDURE = chess_game_eq,
+  COMMUTATOR = =
+);
+
+CREATE OPERATOR < (
+  LEFTARG  = chess_game,
+  RIGHTARG = chess_game,
+  PROCEDURE = chess_game_lt,
+  COMMUTATOR = >
+);
+
+CREATE OPERATOR <= (
+  LEFTARG  = chess_game,
+  RIGHTARG = chess_game,
+  PROCEDURE = chess_game_le,
+  COMMUTATOR = >=
+);
+
+CREATE OPERATOR > (
+  LEFTARG  = chess_game,
+  RIGHTARG = chess_game,
+  PROCEDURE = chess_game_gt,
+  COMMUTATOR = <
+);
+
+CREATE OPERATOR >= (
+  LEFTARG  = chess_game,
+  RIGHTARG = chess_game,
+  PROCEDURE = chess_game_ge,
+  COMMUTATOR = <=
+);
+
+CREATE OR REPLACE FUNCTION chess_game_cmp(chess_game, chess_game)
+  RETURNS integer
+  AS 'MODULE_PATHNAME', 'chess_game_cmp'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE OPERATOR CLASS chess_game_ops
+DEFAULT FOR TYPE chess_game USING btree
+AS
+        OPERATOR        1       <  ,
+        OPERATOR        2       <= ,
+        OPERATOR        3       =  ,
+        OPERATOR        4       >= ,
+        OPERATOR        5       >  ,
+        FUNCTION        1       chess_game_cmp(chess_game, chess_game);

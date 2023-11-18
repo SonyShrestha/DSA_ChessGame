@@ -70,13 +70,17 @@ void putCharStr(char c)
     *(s + 1) = 0;
 }
 
+// TODO: trim spaces from end of string?
 char *chess_game_to_str(SCL_Record record)
 {
     char *game = palloc(sizeof(char) * 4096);
     SCL_printPGN(record, putCharStr, 0);
     for (int i = 0; i < 4096; i++)
     {
-        game[i] = str[i];
+        if (str[i] == '*')
+            game[i] = '\0';
+        else
+            game[i] = str[i];
     }
 
     str[0] = '\0';
@@ -93,7 +97,10 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
     SCL_printPGN(record, putCharStr, 0);
     for (int i = 0; i < 4096; i++)
     {
-        game[i] = str[i];
+        if (str[i] == '*')
+            game[i] = '\0';
+        else
+            game[i] = str[i];
     }
 
     str[0] = '\0';
@@ -205,6 +212,7 @@ Datum getFirstMoves(PG_FUNCTION_ARGS)
 int compare_strings(char *str1, char *str2)
 {
     // Check if str1 starts with str2 (ignoring the last character because it's an added *)
+    // TODO: remove the -1 since we ignore the * now
     if (strncmp(str1, str2, strlen(str2) - 1) == 0)
     {
         return true;
@@ -248,4 +256,100 @@ Datum hasBoard(PG_FUNCTION_ARGS)
     }
 
     PG_RETURN_BOOL(false);
+}
+
+static int
+compare_games(SCL_Record *c, SCL_Record *d)
+{
+    char *chess_game_str1;
+    char *chess_game_str2;
+
+    chess_game_str1 = chess_game_to_str(c);
+    chess_game_str2 = chess_game_to_str(d);
+
+    return strcmp(chess_game_str1, chess_game_str2);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_lt);
+Datum chess_game_lt(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) < 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_le);
+Datum chess_game_le(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) <= 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_eq);
+Datum chess_game_eq(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) == 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_gt);
+Datum chess_game_gt(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) > 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_ge);
+Datum chess_game_ge(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) >= 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_cmp);
+Datum chess_game_cmp(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    int diff = compare_games(c, d);
+
+    int result = 0;
+    if (diff < 0)
+        result = -1;
+    else if (diff > 0)
+        result = 1;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_INT32(result);
 }
