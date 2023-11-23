@@ -62,68 +62,68 @@ CREATE FUNCTION hasBoard(chess_game, chess_board,integer)
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
-CREATE FUNCTION chess_game_lt(chess_game, chess_game)
+CREATE FUNCTION hasOpening_lt(chess_game, chess_game)
   RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_game_lt'
+  AS 'MODULE_PATHNAME', 'hasOpening_lt'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
-CREATE FUNCTION chess_game_le(chess_game, chess_game)
+CREATE FUNCTION hasOpening_le(chess_game, chess_game)
   RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_game_le'
+  AS 'MODULE_PATHNAME', 'hasOpening_le'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
-CREATE FUNCTION chess_game_eq(chess_game, chess_game)
+CREATE FUNCTION hasOpening_eq(chess_game, chess_game)
   RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_game_eq'
-  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
-
-CREATE FUNCTION chess_game_gt(chess_game, chess_game)
-  RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_game_gt'
+  AS 'MODULE_PATHNAME', 'hasOpening_eq'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
-
-CREATE FUNCTION chess_game_ge(chess_game, chess_game)
+CREATE FUNCTION hasOpening_gt(chess_game, chess_game)
   RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_game_ge'
+  AS 'MODULE_PATHNAME', 'hasOpening_gt'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+
+CREATE FUNCTION hasOpening_ge(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'hasOpening_ge'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
 CREATE OPERATOR = (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
-  PROCEDURE = chess_game_eq,
+  PROCEDURE = hasOpening_eq,
   COMMUTATOR = =
 );
 
 CREATE OPERATOR < (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
-  PROCEDURE = chess_game_lt,
+  PROCEDURE = hasOpening_lt,
   COMMUTATOR = >
 );
 
 CREATE OPERATOR <= (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
-  PROCEDURE = chess_game_le,
+  PROCEDURE = hasOpening_le,
   COMMUTATOR = >=
 );
 
 CREATE OPERATOR > (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
-  PROCEDURE = chess_game_gt,
+  PROCEDURE = hasOpening_gt,
   COMMUTATOR = <
 );
 
 CREATE OPERATOR >= (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
-  PROCEDURE = chess_game_ge,
+  PROCEDURE = hasOpening_ge,
   COMMUTATOR = <=
 );
 
