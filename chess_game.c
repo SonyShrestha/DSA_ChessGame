@@ -273,68 +273,98 @@ compare_games(SCL_Record *c, SCL_Record *d)
     return strcmp(chess_game_str1, chess_game_str2);
 }
 
-PG_FUNCTION_INFO_V1(chess_game_lt);
-Datum chess_game_lt(PG_FUNCTION_ARGS)
+PG_FUNCTION_INFO_V1(hasOpening_lt);
+Datum hasOpening_lt(PG_FUNCTION_ARGS)
 {
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *record1 = PG_GETARG_GAME_P(0);
+    SCL_Record *record2 = PG_GETARG_GAME_P(1);
+    char *chess_game_str1;
+    char *chess_game_str2;
+    bool result;
 
-    bool result = compare_games(c, d) < 0;
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2) < 0;
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
+
+    PG_FREE_IF_COPY(chess_game_str1, 0);
+    PG_FREE_IF_COPY(chess_game_str2, 1);
     PG_RETURN_BOOL(result);
 }
 
-PG_FUNCTION_INFO_V1(chess_game_le);
-Datum chess_game_le(PG_FUNCTION_ARGS)
+PG_FUNCTION_INFO_V1(hasOpening_le);
+Datum hasOpening_le(PG_FUNCTION_ARGS)
 {
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *record1 = PG_GETARG_GAME_P(0);
+    SCL_Record *record2 = PG_GETARG_GAME_P(1);
+    char *chess_game_str1;
+    char *chess_game_str2;
+    bool result;
 
-    bool result = compare_games(c, d) <= 0;
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2) <= 0;
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
+
+    PG_FREE_IF_COPY(chess_game_str1, 0);
+    PG_FREE_IF_COPY(chess_game_str2, 1);
     PG_RETURN_BOOL(result);
 }
 
-PG_FUNCTION_INFO_V1(chess_game_eq);
-Datum chess_game_eq(PG_FUNCTION_ARGS)
+PG_FUNCTION_INFO_V1(hasOpening_eq);
+Datum hasOpening_eq(PG_FUNCTION_ARGS)
 {
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *record1 = PG_GETARG_GAME_P(0);
+    SCL_Record *record2 = PG_GETARG_GAME_P(1);
+    char *chess_game_str1;
+    char *chess_game_str2;
+    bool result;
 
-    bool result = compare_games(c, d) == 0;
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2) == 0;
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
+
+    PG_FREE_IF_COPY(chess_game_str1, 0);
+    PG_FREE_IF_COPY(chess_game_str2, 1);
     PG_RETURN_BOOL(result);
 }
 
-PG_FUNCTION_INFO_V1(chess_game_gt);
-Datum chess_game_gt(PG_FUNCTION_ARGS)
+PG_FUNCTION_INFO_V1(hasOpening_gt);
+Datum hasOpening_gt(PG_FUNCTION_ARGS)
 {
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *record1 = PG_GETARG_GAME_P(0);
+    SCL_Record *record2 = PG_GETARG_GAME_P(1);
+    char *chess_game_str1;
+    char *chess_game_str2;
+    bool result;
 
-    bool result = compare_games(c, d) > 0;
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2) > 0;
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
+
+    PG_FREE_IF_COPY(chess_game_str1, 0);
+    PG_FREE_IF_COPY(chess_game_str2, 1);
     PG_RETURN_BOOL(result);
 }
 
-PG_FUNCTION_INFO_V1(chess_game_ge);
-Datum chess_game_ge(PG_FUNCTION_ARGS)
+PG_FUNCTION_INFO_V1(hasOpening_ge);
+Datum hasOpening_ge(PG_FUNCTION_ARGS)
 {
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *record1 = PG_GETARG_GAME_P(0);
+    SCL_Record *record2 = PG_GETARG_GAME_P(1);
+    char *chess_game_str1;
+    char *chess_game_str2;
+    bool result;
 
-    bool result = compare_games(c, d) >= 0;
+    chess_game_str1 = chess_game_to_str(record1);
+    chess_game_str2 = chess_game_to_str(record2);
+    result = compare_strings(chess_game_str1, chess_game_str2) >= 0;
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
+
+    PG_FREE_IF_COPY(chess_game_str1, 0);
+    PG_FREE_IF_COPY(chess_game_str2, 1);
     PG_RETURN_BOOL(result);
 }
 
@@ -344,7 +374,7 @@ Datum chess_game_cmp(PG_FUNCTION_ARGS)
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
-    int diff = compare_games(c, d);
+    int diff = compare_strings(c, d);
 
     int result = 0;
     if (diff < 0)
