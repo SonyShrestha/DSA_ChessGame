@@ -44,6 +44,16 @@ Datum chess_game_in(PG_FUNCTION_ARGS)
     PG_RETURN_GAME_P(record);
 }
 
+// Function to convert Chess Board to string
+char *chess_board_to_str(SCL_Board board)
+{
+    char *str = palloc(sizeof(char) * 256);
+
+    if (SCL_boardToFEN(board, str) != 0){
+        return str;
+    }
+}
+
 PG_FUNCTION_INFO_V1(chess_board_out);
 Datum chess_board_out(PG_FUNCTION_ARGS)
 {
@@ -246,13 +256,18 @@ Datum hasBoard(PG_FUNCTION_ARGS)
     SCL_Board *board = PG_GETARG_BOARD_P(1);
     int half_move = PG_GETARG_INT32(2);
 
+    char* board_state1 = chess_board_to_str(board);
+    int index1 = strcspn(board_state1, " ");
+
     for (int i = 0; i <= half_move; i++)
     {
         SCL_Board *result_board_state = get_board_internal(*record, i);
 
+        char* board_state2 = chess_board_to_str(result_board_state);
+
         // TODO: SCL_boardsDiffer does not ignore the things after the board state
         // is there a function that does that? if not we can do our own?
-        if (SCL_boardsDiffer(*result_board_state, *board) == 0)
+        if (strncmp(board_state1, board_state2, index1) == 0) 
         {
             PG_RETURN_BOOL(true);
         }
