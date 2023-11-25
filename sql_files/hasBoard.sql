@@ -1,5 +1,10 @@
 
-------------------------------------------- Validate hasBoard Functionality -------------------------------------------
+------------------------------------------- Validate hasBoard(chess_game,chess_board,integer) Functionality -------------------------------------------
+/*
+Returns true if the chessgame contains the given board state in its first N half-moves 
+comparing only the state of the pieces and not comparing the move count, castling right, en passant piece
+*/
+
 ----------------------- Test Case 1
 /*
 For chess game 

@@ -1,4 +1,8 @@
------------------------------------- Validate getBoard functionality ---------------------------------
+------------------------------------ Validate getBoard(chessgame, integer) functionality ---------------------------------
+/*
+Return the board state at a given half-move
+*/
+
 SELECT getBoard('1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. d3',0);
 /*
 Output

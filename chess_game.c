@@ -533,9 +533,8 @@ PG_FUNCTION_INFO_V1(chess_game_extractValue);
 
 Datum chess_game_extractValue(PG_FUNCTION_ARGS)
 {
-    // Retrieve the text pointer from the function arguments
-        SCL_Record *chessgame = PG_GETARG_GAME_P(0);
-        char *input_str = chess_game_to_str(chessgame);
+    SCL_Record *chessgame = PG_GETARG_GAME_P(0);
+    char *input_str = chess_game_to_str(chessgame);
 
         // Pointer to store the number of keys extracted
         int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
