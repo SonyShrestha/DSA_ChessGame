@@ -91,7 +91,17 @@ CREATE FUNCTION chess_game_ge(chess_game, chess_game)
   AS 'MODULE_PATHNAME', 'chess_game_ge'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
+CREATE FUNCTION chess_contains_func(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_contains_func'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
+
+CREATE FUNCTION chess_equals_func(chess_game, chess_game)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chess_equals_func'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+  
 CREATE OPERATOR = (
   LEFTARG  = chess_game,
   RIGHTARG = chess_game,
@@ -142,3 +152,56 @@ AS
         OPERATOR        4       >= ,
         OPERATOR        5       >  ,
         FUNCTION        1       chess_game_cmp(chess_game, chess_game);
+
+
+CREATE OR REPLACE FUNCTION chess_game_cmp(chess_game, chess_game)
+  RETURNS integer
+  AS 'MODULE_PATHNAME', 'chess_game_cmp'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+
+CREATE OPERATOR CLASS chess_game_ops
+DEFAULT FOR TYPE chess_game USING btree
+AS
+        OPERATOR        1       <  ,
+        OPERATOR        2       <= ,
+        OPERATOR        3       =  ,
+        OPERATOR        4       >= ,
+        OPERATOR        5       >  ,
+        FUNCTION        1       chess_game_cmp(chess_game, chess_game);
+
+
+
+CREATE FUNCTION chess_game_extractValue(chess_game,internal)
+RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractValue'
+LANGUAGE C STRICT;
+
+
+CREATE FUNCTION chess_game_extractQuery(chess_game, internal, int2, internal, internal)
+RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractQuery'
+LANGUAGE C STRICT;
+
+CREATE FUNCTION chess_game_consistent(internal, int2, anyelement, int4, internal, internal)
+RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_consistent'
+LANGUAGE C STRICT;
+
+
+CREATE FUNCTION chess_move_compare(chess_game,chess_game)
+RETURNS internal AS 'MODULE_PATHNAME', 'chess_move_compare'
+LANGUAGE C STRICT;
+
+-- "contains" operator is often represented as @>
+CREATE OPERATOR @> 
+(PROCEDURE = chess_contains_func, LEFTARG = chess_game, RIGHTARG = chess_game);
+
+CREATE OPERATOR == 
+(PROCEDURE = chess_equals_func, LEFTARG = chess_game, RIGHTARG = chess_game);
+
+CREATE OPERATOR CLASS chessgame_ops
+DEFAULT FOR TYPE chess_game USING gin AS
+    OPERATOR        1       @>,
+    OPERATOR        2       ==,
+    FUNCTION		    1		    chess_move_compare(chess_game,chess_game),
+    FUNCTION        2       chess_game_extractValue(chess_game,internal),
+    FUNCTION        3       chess_game_extractQuery(chess_game, internal, int2, internal, internal),
+    FUNCTION        4       chess_game_consistent(internal, int2, anyelement, int4, internal, internal);
