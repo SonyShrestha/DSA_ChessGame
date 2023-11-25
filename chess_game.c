@@ -49,7 +49,8 @@ char *chess_board_to_str(SCL_Board board)
 {
     char *str = palloc(sizeof(char) * 256);
 
-    if (SCL_boardToFEN(board, str) != 0){
+    if (SCL_boardToFEN(board, str) != 0)
+    {
         return str;
     }
 }
@@ -151,57 +152,51 @@ Datum getBoard(PG_FUNCTION_ARGS)
     PG_RETURN_BOARD_P(board);
 }
 
-void truncate_pgn_internal(char *chess_notation, int n, char *result_board)
+void truncate_pgn_internal(char *chess_notation, int half_moves, char *result_board)
 {
-    int idx = 0;
+    int curr_str_idx = 0;
+    int curr_half_move = 0;
+
+    if (half_moves == 0)
+    {
+        result_board[0] = '\0';
+        return;
+    }
 
     while (1)
     {
-        char c = chess_notation[idx];
-        if (c == '\0')
+        // copy the full move number and the space after it
+        while (1)
         {
+            result_board[curr_str_idx++] = chess_notation[curr_str_idx];
+            if (result_board[curr_str_idx - 1] == ' ')
+                break;
+        }
+
+        // copy the first move
+        while (1)
+        {
+            result_board[curr_str_idx++] = chess_notation[curr_str_idx];
+            if (result_board[curr_str_idx - 1] == ' ')
+                break;
+        }
+
+        if (++curr_half_move == half_moves)
             break;
-        }
 
-        if (c == '.')
+        // copy the second move
+        while (1)
         {
-            char next_char = chess_notation[idx + 1];
-            if (next_char == ' ')
-            {
-                int move_number = 0;
-                int digit_idx = idx - 1;
-
-                int prev_space_idx = -1;
-
-                while (digit_idx >= 0)
-                {
-                    char c = chess_notation[digit_idx];
-                    if (c == ' ')
-                    {
-                        prev_space_idx = digit_idx;
-                        break;
-                    }
-
-                    int digit = c - '0';
-
-                    move_number += (digit * pow(10, idx - 1 - digit_idx));
-
-                    digit_idx--;
-                }
-
-                if (move_number > n)
-                {
-                    result_board[prev_space_idx] = '\0';
-                    break;
-                }
-            }
+            result_board[curr_str_idx++] = chess_notation[curr_str_idx];
+            if (result_board[curr_str_idx - 1] == ' ' || result_board[curr_str_idx - 1] == '\0')
+                break;
         }
 
-        result_board[idx] = c;
-        idx++;
+        if (++curr_half_move == half_moves || result_board[curr_str_idx - 1] == '\0')
+            break;
     }
 
-    result_board[idx] = '\0';
+    result_board[curr_str_idx] = '\0';
 }
 
 PG_FUNCTION_INFO_V1(getFirstMoves);
@@ -256,18 +251,18 @@ Datum hasBoard(PG_FUNCTION_ARGS)
     SCL_Board *board = PG_GETARG_BOARD_P(1);
     int half_move = PG_GETARG_INT32(2);
 
-    char* board_state1 = chess_board_to_str(board);
+    char *board_state1 = chess_board_to_str(board);
     int index1 = strcspn(board_state1, " ");
 
     for (int i = 0; i <= half_move; i++)
     {
         SCL_Board *result_board_state = get_board_internal(*record, i);
 
-        char* board_state2 = chess_board_to_str(result_board_state);
+        char *board_state2 = chess_board_to_str(result_board_state);
 
         // TODO: SCL_boardsDiffer does not ignore the things after the board state
         // is there a function that does that? if not we can do our own?
-        if (strncmp(board_state1, board_state2, index1) == 0) 
+        if (strncmp(board_state1, board_state2, index1) == 0)
         {
             PG_RETURN_BOOL(true);
         }
