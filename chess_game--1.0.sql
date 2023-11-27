@@ -155,22 +155,22 @@ AS
 
 
 
-CREATE FUNCTION chess_game_extractValue(internal)
+CREATE FUNCTION chess_game_extractValue(chess_game,internal)
 RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractValue'
 LANGUAGE C STRICT;
 
 
-CREATE FUNCTION chess_game_extractQuery(internal)
+CREATE FUNCTION chess_game_extractQuery(chess_game,internal)
 RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractQuery'
 LANGUAGE C STRICT;
 
-CREATE FUNCTION chess_game_consistent(internal)
+CREATE FUNCTION chess_game_consistent(internal,internal,internal,internal,internal,internal)
 RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_consistent'
 LANGUAGE C STRICT;
 
 
-CREATE FUNCTION chess_move_compare(internal)
-RETURNS internal AS 'MODULE_PATHNAME', 'chess_move_compare'
+CREATE FUNCTION chess_board_compare(chess_board,chess_board)
+RETURNS int AS 'MODULE_PATHNAME', 'chess_board_compare'
 LANGUAGE C STRICT;
 
 -- "contains" operator is often represented as @>
@@ -184,7 +184,7 @@ CREATE OPERATOR CLASS chessgame_ops
 DEFAULT FOR TYPE chess_game USING gin AS
     OPERATOR        1       @>,
     OPERATOR        2       ==,
-    FUNCTION		    1		    chess_move_compare(internal),
-    FUNCTION        2       chess_game_extractValue(internal),
-    FUNCTION        3       chess_game_extractQuery(internal),
-    FUNCTION        4       chess_game_consistent(internal);
+    FUNCTION		    1		    chess_board_compare(chess_board, chess_board),
+    FUNCTION        2       chess_game_extractValue(chess_game,internal),
+    FUNCTION        3       chess_game_extractQuery(chess_game,internal),
+    FUNCTION        4       chess_game_consistent(internal,internal,internal,internal,internal,internal);

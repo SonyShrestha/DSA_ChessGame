@@ -421,23 +421,6 @@ Datum chess_contains_func(PG_FUNCTION_ARGS)
 }
 
 
-// checks if two chessgame instances have exactly the same moves
-
-//PG_FUNCTION_INFO_V1(chess_equals_func);
-
-//Datum chess_equals_func(PG_FUNCTION_ARGS)
-//{
-//    text *game1 = PG_GETARG_TEXT_PP(0);
-//    text *game2 = PG_GETARG_TEXT_PP(1);
-//
-//       // Use PostgreSQL's built-in text equality function
-//    bool isEqual = DatumGetBool(DirectFunctionCall2(texteq,
-//                                                       PointerGetDatum(game1),
-//                                                       PointerGetDatum(game2)));
-//
-//    PG_RETURN_BOOL(isEqual);
-//}
-
 PG_FUNCTION_INFO_V1(chess_equals_func);
 
 Datum chess_equals_func(PG_FUNCTION_ARGS)
@@ -457,23 +440,6 @@ Datum chess_equals_func(PG_FUNCTION_ARGS)
        PG_RETURN_BOOL(result);
 }
 
-
-
-//PG_FUNCTION_INFO_V1(chess_move_compare);
-
-//Datum chess_move_compare(PG_FUNCTION_ARGS)
-//{
-//    // Convert Datum to text pointers for individual moves
-//    text *move_a = DatumGetTextP(PG_GETARG_DATUM(0));
-//    text *move_b = DatumGetTextP(PG_GETARG_DATUM(1));
-//
-//    // Use PostgreSQL's varlena comparison function with default collation
-//    int cmp = varstr_cmp(VARDATA_ANY(move_a), VARSIZE_ANY_EXHDR(move_a),
-//                         VARDATA_ANY(move_b), VARSIZE_ANY_EXHDR(move_b),
-//                         InvalidOid);  // Default collation
-//
-//    PG_RETURN_INT32(cmp);
-//}
 
 PG_FUNCTION_INFO_V1(chess_move_compare);
 
@@ -496,6 +462,41 @@ Datum chess_move_compare(PG_FUNCTION_ARGS)
 }
 
 
+PG_FUNCTION_INFO_V1(chess_board_compare);
+
+Datum chess_board_compare(PG_FUNCTION_ARGS)
+{
+    SCL_Board *c = PG_GETARG_BOARD_P(0);
+    SCL_Board *d = PG_GETARG_BOARD_P(1);
+
+    char *board1=chess_board_to_str(c);
+    char *board2=chess_board_to_str(d);
+
+    int diff = compare_strings(board1, board2);
+
+    int result = 0;
+    if (diff < 0)
+        result = -1;
+    else if (diff > 0)
+        result = 1;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_INT32(result);
+}
+
+int countCommas(char *str) {
+    int count = 0;
+    while (*str) {
+        if (*str == ',') {
+            count++;
+        }
+        str++;
+    }
+    return count;
+}
+
+
 
 //
 //parses a string of chess game notation, extracts individual moves (ignoring the move numbers), 
@@ -507,107 +508,91 @@ PG_FUNCTION_INFO_V1(chess_game_extractQuery);
 
 Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
 {
-    // Get the query text from the function arguments
-    SCL_Record *chessgame = PG_GETARG_GAME_P(0);
-
-    // Pointer to store the number of keys extracted
+    text *query_text = PG_GETARG_TEXT_PP(0);
     int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
 
-    // Convert the query text to a C string
-    char *query_str = chess_game_to_str(chessgame);
+    char *query_str = text_to_cstring(query_text);
 
-    // Initialize an array to store the extracted keys
-    Datum *keys;
-    int keys_size = 32; // Starting size of the keys array
-    int nkeys_local = 0; // Counter for the number of keys extracted
-    keys = (Datum *) palloc(keys_size * sizeof(Datum));
+    // Make a copy of the input string because strtok modifies the string
+    char *inputCopy = strdup(query_str);
 
-    // Tokenize the query string to extract moves
-    char *token, *saveptr;
-    const char delim[3] = " ."; // Space and period as delimiters
-    token = strtok_r(query_str, delim, &saveptr);
+    int total_boards = countCommas(query_str)+1;
+    
+    char *keys = (char **) malloc(total_boards * sizeof(char));
+    int counter = 0;
+
+    // Tokenize the string
+    const char delim[2] = ",";
+    char *token = strtok(inputCopy, delim);
 
     while (token != NULL) {
-        SCL_Board *board = get_starting_board();
-        if (nkeys_local >= keys_size) {
-            // Double the size of the array if more space is needed
-            SCL_recordApply(chessgame, board, nkeys_local);
-            keys_size *= 256;
-            keys = (Datum *) repalloc(keys, keys_size * sizeof(Datum));
+        if ((keys[counter] = (char *)malloc(strlen(token) + 1)) != NULL) {
+            strcpy(keys[counter], token);
         }
+        counter+=1;
+        token = strtok(NULL, delim);
+    }
 
-        // Skip move numbers and only extract actual chess moves
-        if (!isdigit(token[0])) {
-            text *move_text = cstring_to_text(board);
-            keys[nkeys_local++] = PointerGetDatum(move_text);
+    *nkeys = total_boards;
+    PG_FREE_IF_COPY(query_text, 0);
+    PG_FREE_IF_COPY(nkeys, 1);
+    PG_RETURN_POINTER(keys);
+}
+
+
+
+int count_half_moves(SCL_Record record)
+{
+    char *chess_game_str = chess_game_to_str(record);
+
+    // Initialize the counter for half-moves
+    int total_half_moves = 0;
+
+    // Tokenize the string considering both space and period as delimiters
+    char *token, *saveptr;
+    const char delim[3] = " .";
+    token = strtok_r(chess_game_str, delim, &saveptr);
+
+    while (token != NULL)
+    {
+        // Skip move numbers and count only the moves
+        if (!isdigit(token[0]))
+        {
+            total_half_moves++;
         }
 
         // Get the next token
         token = strtok_r(NULL, delim, &saveptr);
     }
 
-    // Store the number of keys extracted in the provided pointer
-    *nkeys = nkeys_local;
-
-    PG_FREE_IF_COPY(chessgame, 0);
-    PG_FREE_IF_COPY(nkeys, 1);
-    // Return the array of keys
-    PG_RETURN_POINTER(keys);
+    // Return the total number of half-moves
+    return total_half_moves;
 }
-
-
 
 
 PG_FUNCTION_INFO_V1(chess_game_extractValue);
 
 Datum chess_game_extractValue(PG_FUNCTION_ARGS)
 {
-    SCL_Record *chessgame = PG_GETARG_GAME_P(0);
-    char *input_str = chess_game_to_str(chessgame);
+    SCL_Record *record = PG_GETARG_GAME_P(0);
+    int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
 
-        // Pointer to store the number of keys extracted
-        int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
+    char *chess_game_str = chess_game_to_str(record);
+    int total_half_moves = count_half_moves(record);
+    char *keys = (char **) palloc(total_half_moves * sizeof(char));
 
-        // Define array to hold the extracted keys (moves)
-        Datum *keys;
-        int keys_size = 32;  // Initial size, adjust based on expected number of moves
-        int num_keys = 0;    // Local variable for the number of keys extracted
-        keys = (Datum *) palloc(keys_size * sizeof(Datum));
+    for (int half_move = 0; half_move < total_half_moves; ++half_move) {
+        SCL_Board *board = get_board_internal(record, half_move);
+        char *board_state_str = chess_board_to_str(board);
 
-        // Tokenize the string considering both space and period as delimiters
-        char *token, *saveptr;
-        const char delim[3] = " ."; // Space and period as delimiters
-        token = strtok_r(input_str, delim, &saveptr);
-
-        while (token != NULL)
-        {
-            // Skip move numbers
-            if (!isdigit(token[0]))
-            {
-                
-                SCL_Board *board = get_starting_board();
-
-                if (num_keys >= keys_size)
-                {
-                    SCL_recordApply(chessgame, board, num_keys);
-                    keys_size *= 256;
-
-                    keys = (Datum *) repalloc(keys, keys_size * sizeof(Datum));
-                }
-
-                text *move_text = cstring_to_text(board);
-                keys[num_keys++] = PointerGetDatum(move_text);
-            }
-
-            // Get the next token
-            token = strtok_r(NULL, delim, &saveptr);
+        if ((keys[half_move] = (char *)palloc(strlen(board_state_str) + 1)) != NULL) {
+            strcpy(keys[half_move], board_state_str);
         }
-
-        // Assign the number of extracted keys to the pointer provided
-        *nkeys = num_keys;
-        PG_FREE_IF_COPY(chessgame, 0);
-        PG_FREE_IF_COPY(nkeys, 1);
-        PG_RETURN_POINTER(keys);
+    }
+    *nkeys = total_half_moves;
+    PG_FREE_IF_COPY(record, 0);
+    PG_FREE_IF_COPY(nkeys, 1);
+    PG_RETURN_POINTER(keys);
 }
 
 
