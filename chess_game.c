@@ -4,6 +4,11 @@
 #include "libpq/pqformat.h"
 #include <stdint.h>
 #include "smallchesslib.h"
+#include "access/gin.h"
+#include "access/stratnum.h"
+#include "utils/array.h"
+#include "utils/builtins.h"
+#include "utils/lsyscache.h"
 
 PG_MODULE_MAGIC;
 
@@ -122,8 +127,8 @@ Datum chess_game_out(PG_FUNCTION_ARGS)
 SCL_Board *get_starting_board()
 {
     // TODO: should we use `palloc` for the `board`? since it's being freed by postgres
-    SCL_Board *board = malloc(sizeof(SCL_Board));
-    char *str = malloc(sizeof(char) * 256);
+    SCL_Board *board = palloc(sizeof(SCL_Board));
+    char *str = palloc(sizeof(char) * 256);
 
     strcpy(str, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
@@ -508,35 +513,41 @@ PG_FUNCTION_INFO_V1(chess_game_extractQuery);
 
 Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
 {
-    text *query_text = PG_GETARG_TEXT_PP(0);
+    SCL_Board *board = PG_GETARG_BOARD_P(0);
     int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
 
-    char *query_str = text_to_cstring(query_text);
+	StrategyNumber strategy = PG_GETARG_UINT16(2);
+
+	bool   **pmatch = (bool **) PG_GETARG_POINTER(3); 
+	Pointer	   *extra_data = (Pointer *) PG_GETARG_POINTER(4); 
+	bool	  **nullFlags = (bool **) PG_GETARG_POINTER(5);
+	int32	   *searchMode = (int32 *) PG_GETARG_POINTER(6);
+
+    *searchMode = GIN_SEARCH_MODE_DEFAULT;
 
     // Make a copy of the input string because strtok modifies the string
-    char *inputCopy = strdup(query_str);
+    // char *inputCopy = strdup(query_str);
 
-    int total_boards = countCommas(query_str)+1;
+    // int total_boards = countCommas(query_str)+1;
     
-    char *keys = (char **) malloc(total_boards * sizeof(char));
-    int counter = 0;
+    // char *keys = (char **) malloc(total_boards * sizeof(char));
+    // int counter = 0;
 
-    // Tokenize the string
-    const char delim[2] = ",";
-    char *token = strtok(inputCopy, delim);
+    // // Tokenize the string
+    // const char delim[2] = ",";
+    // char *token = strtok(inputCopy, delim);
 
-    while (token != NULL) {
-        if ((keys[counter] = (char *)malloc(strlen(token) + 1)) != NULL) {
-            strcpy(keys[counter], token);
-        }
-        counter+=1;
-        token = strtok(NULL, delim);
-    }
+    // while (token != NULL) {
+    //     if ((keys[counter] = (char *)malloc(strlen(token) + 1)) != NULL) {
+    //         strcpy(keys[counter], token);
+    //     }
+    //     counter+=1;
+    //     token = strtok(NULL, delim);
+    // }
 
-    *nkeys = total_boards;
-    PG_FREE_IF_COPY(query_text, 0);
-    PG_FREE_IF_COPY(nkeys, 1);
-    PG_RETURN_POINTER(keys);
+    *nkeys = 1;
+    // PG_FREE_IF_COPY(query_text, 0);
+    PG_RETURN_BOARD_P(board);
 }
 
 
@@ -576,10 +587,12 @@ Datum chess_game_extractValue(PG_FUNCTION_ARGS)
 {
     SCL_Record *record = PG_GETARG_GAME_P(0);
     int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
+    bool	  **nullFlags = (bool **) PG_GETARG_POINTER(2);
 
     char *chess_game_str = chess_game_to_str(record);
     int total_half_moves = count_half_moves(record);
     char *keys = (char **) palloc(total_half_moves * sizeof(char));
+    bool	   *nulls;
 
     for (int half_move = 0; half_move < total_half_moves; ++half_move) {
         SCL_Board *board = get_board_internal(record, half_move);
@@ -589,9 +602,9 @@ Datum chess_game_extractValue(PG_FUNCTION_ARGS)
             strcpy(keys[half_move], board_state_str);
         }
     }
-    *nkeys = total_half_moves;
+    *nkeys= total_half_moves;
+    *nullFlags = nulls;
     PG_FREE_IF_COPY(record, 0);
-    PG_FREE_IF_COPY(nkeys, 1);
     PG_RETURN_POINTER(keys);
 }
 
@@ -629,11 +642,10 @@ Datum chess_game_consistent(PG_FUNCTION_ARGS)
 
     // No keys matched, or for other unhandled strategies, return false
     *recheck = false;
-    PG_FREE_IF_COPY(check, 0);
-    PG_FREE_IF_COPY(strategy, 1);
-    PG_FREE_IF_COPY(query, 2);
-    PG_FREE_IF_COPY(nkeys, 3);
-    PG_FREE_IF_COPY(extra_data,4);
-    PG_FREE_IF_COPY(recheck,5);
+    // PG_FREE_IF_COPY(check, 0);
+    // PG_FREE_IF_COPY(strategy, 1);
+    // PG_FREE_IF_COPY(query, 2);
+    // PG_FREE_IF_COPY(extra_data,4);
+    // PG_FREE_IF_COPY(recheck,5);
     PG_RETURN_BOOL(false);
 }

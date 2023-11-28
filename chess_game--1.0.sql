@@ -155,13 +155,13 @@ AS
 
 
 
-CREATE FUNCTION chess_game_extractValue(chess_game,internal)
+CREATE FUNCTION chess_game_extractValue(chess_game,internal,internal)
 RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractValue'
 LANGUAGE C STRICT;
 
 
-CREATE FUNCTION chess_game_extractQuery(chess_game,internal)
-RETURNS internal AS 'MODULE_PATHNAME', 'chess_game_extractQuery'
+CREATE FUNCTION chess_game_extractQuery(chess_game,internal,internal,internal,internal,internal,internal)
+RETURNS chess_board AS 'MODULE_PATHNAME', 'chess_game_extractQuery'
 LANGUAGE C STRICT;
 
 CREATE FUNCTION chess_game_consistent(internal,internal,internal,internal,internal,internal)
@@ -182,9 +182,8 @@ CREATE OPERATOR ==
 
 CREATE OPERATOR CLASS chessgame_ops
 DEFAULT FOR TYPE chess_game USING gin AS
-    OPERATOR        1       @>,
-    OPERATOR        2       ==,
     FUNCTION		    1		    chess_board_compare(chess_board, chess_board),
-    FUNCTION        2       chess_game_extractValue(chess_game,internal),
-    FUNCTION        3       chess_game_extractQuery(chess_game,internal),
-    FUNCTION        4       chess_game_consistent(internal,internal,internal,internal,internal,internal);
+    FUNCTION        2       chess_game_extractValue(chess_game,internal, internal),
+    FUNCTION        3       chess_game_extractQuery(chess_game,internal,internal,internal,internal,internal,internal),
+    FUNCTION        4       chess_game_consistent(internal,internal,internal,internal,internal,internal),
+    STORAGE chess_board;
