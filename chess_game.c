@@ -301,6 +301,9 @@ Datum chess_game_lt(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(result);
 }
 
+// TODO: update this operation to append `~~` at the end of the second string
+//  so it can be used efficiently in a B-tree index.
+//  see: https://www.richard-towers.com/2023/01/29/finding-the-longest-matching-prefix-in-sql.html
 PG_FUNCTION_INFO_V1(chess_game_le);
 Datum chess_game_le(PG_FUNCTION_ARGS)
 {
@@ -312,6 +315,23 @@ Datum chess_game_le(PG_FUNCTION_ARGS)
     PG_FREE_IF_COPY(c, 0);
     PG_FREE_IF_COPY(d, 1);
     PG_RETURN_BOOL(result);
+}
+
+// TODO: testing function - remove later
+PG_FUNCTION_INFO_V1(concat_game);
+Datum concat_game(PG_FUNCTION_ARGS)
+{
+    SCL_Record *game_record1 = PG_GETARG_GAME_P(0);
+
+    char *game1_str = chess_game_to_str(game_record1);
+
+    // adds ~~ to the end of the string
+    char *game1_str_concat = palloc(sizeof(char) * strlen(game1_str) + 2 + 1);
+    strcpy(game1_str_concat, game1_str);
+    strcat(game1_str_concat, "~~");
+
+    PG_FREE_IF_COPY(game_record1, 0);
+    PG_RETURN_CSTRING(game1_str_concat);
 }
 
 PG_FUNCTION_INFO_V1(chess_game_eq);
@@ -372,10 +392,8 @@ Datum chess_game_cmp(PG_FUNCTION_ARGS)
     PG_RETURN_INT32(result);
 }
 
-
-
 // ------------------------------------------------------------------------------------------- //
-//checks if the first chessgame contains all moves from the second chessgame
+// checks if the first chessgame contains all moves from the second chessgame
 
 PG_FUNCTION_INFO_V1(chess_contains_func);
 
@@ -396,26 +414,24 @@ Datum chess_contains_func(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(contains);
 }
 
-
 PG_FUNCTION_INFO_V1(chess_equals_func);
 
 Datum chess_equals_func(PG_FUNCTION_ARGS)
 {
     SCL_Record *c = PG_GETARG_GAME_P(0);
-       SCL_Record *d = PG_GETARG_GAME_P(1);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
 
-       // Assuming compare_games function returns 0 if games are equal, and non-zero otherwise
-       int diff = compare_games(c, d);
+    // Assuming compare_games function returns 0 if games are equal, and non-zero otherwise
+    int diff = compare_games(c, d);
 
-       // Check if the games are equal
-       bool result = (diff == 0);
+    // Check if the games are equal
+    bool result = (diff == 0);
 
-       PG_FREE_IF_COPY(c, 0);
-       PG_FREE_IF_COPY(d, 1);
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
 
-       PG_RETURN_BOOL(result);
+    PG_RETURN_BOOL(result);
 }
-
 
 PG_FUNCTION_INFO_V1(chess_move_compare);
 
@@ -437,7 +453,6 @@ Datum chess_move_compare(PG_FUNCTION_ARGS)
     PG_RETURN_INT32(result);
 }
 
-
 PG_FUNCTION_INFO_V1(chess_board_compare);
 
 Datum chess_board_compare(PG_FUNCTION_ARGS)
@@ -445,8 +460,8 @@ Datum chess_board_compare(PG_FUNCTION_ARGS)
     SCL_Board *c = PG_GETARG_BOARD_P(0);
     SCL_Board *d = PG_GETARG_BOARD_P(1);
 
-    char *board1=chess_board_to_str(c);
-    char *board2=chess_board_to_str(d);
+    char *board1 = chess_board_to_str(c);
+    char *board2 = chess_board_to_str(d);
 
     int diff = compare_strings(board1, board2);
 
@@ -461,10 +476,13 @@ Datum chess_board_compare(PG_FUNCTION_ARGS)
     PG_RETURN_INT32(result);
 }
 
-int countCommas(char *str) {
+int countCommas(char *str)
+{
     int count = 0;
-    while (*str) {
-        if (*str == ',') {
+    while (*str)
+    {
+        if (*str == ',')
+        {
             count++;
         }
         str++;
@@ -472,27 +490,25 @@ int countCommas(char *str) {
     return count;
 }
 
-
-
 //
-//parses a string of chess game notation, extracts individual moves (ignoring the move numbers), 
-//and stores them in an array. This array, along with the count of moves, is then returned. 
-//This function is particularly tailored for use in a GIN index, where it would be used to extract 
-//indexable elements (the moves) from the stored data (the game notation
+// parses a string of chess game notation, extracts individual moves (ignoring the move numbers),
+// and stores them in an array. This array, along with the count of moves, is then returned.
+// This function is particularly tailored for use in a GIN index, where it would be used to extract
+// indexable elements (the moves) from the stored data (the game notation
 
 PG_FUNCTION_INFO_V1(chess_game_extractQuery);
 
 Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
 {
     SCL_Board *board = PG_GETARG_BOARD_P(0);
-    int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
+    int32_t *nkeys = (int32_t *)PG_GETARG_POINTER(1);
 
-	StrategyNumber strategy = PG_GETARG_UINT16(2);
+    StrategyNumber strategy = PG_GETARG_UINT16(2);
 
-	bool   **pmatch = (bool **) PG_GETARG_POINTER(3); 
-	Pointer	   *extra_data = (Pointer *) PG_GETARG_POINTER(4); 
-	bool	  **nullFlags = (bool **) PG_GETARG_POINTER(5);
-	int32	   *searchMode = (int32 *) PG_GETARG_POINTER(6);
+    bool **pmatch = (bool **)PG_GETARG_POINTER(3);
+    Pointer *extra_data = (Pointer *)PG_GETARG_POINTER(4);
+    bool **nullFlags = (bool **)PG_GETARG_POINTER(5);
+    int32 *searchMode = (int32 *)PG_GETARG_POINTER(6);
 
     *searchMode = GIN_SEARCH_MODE_DEFAULT;
 
@@ -500,7 +516,7 @@ Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
     // char *inputCopy = strdup(query_str);
 
     // int total_boards = countCommas(query_str)+1;
-    
+
     // char *keys = (char **) malloc(total_boards * sizeof(char));
     // int counter = 0;
 
@@ -520,8 +536,6 @@ Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
     // PG_FREE_IF_COPY(query_text, 0);
     PG_RETURN_BOARD_P(board);
 }
-
-
 
 int count_half_moves(SCL_Record record)
 {
@@ -551,41 +565,41 @@ int count_half_moves(SCL_Record record)
     return total_half_moves;
 }
 
-
 PG_FUNCTION_INFO_V1(chess_game_extractValue);
 
 Datum chess_game_extractValue(PG_FUNCTION_ARGS)
 {
     SCL_Record *record = PG_GETARG_GAME_P(0);
-    int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
-    bool	  **nullFlags = (bool **) PG_GETARG_POINTER(2);
+    int32_t *nkeys = (int32_t *)PG_GETARG_POINTER(1);
+    bool **nullFlags = (bool **)PG_GETARG_POINTER(2);
 
     char *chess_game_str = chess_game_to_str(record);
     int total_half_moves = count_half_moves(record);
-    char *keys = (char **) palloc(total_half_moves * sizeof(char));
-    bool	   *nulls;
+    char *keys = (char **)palloc(total_half_moves * sizeof(char));
+    bool *nulls;
 
-    for (int half_move = 0; half_move < total_half_moves; ++half_move) {
+    for (int half_move = 0; half_move < total_half_moves; ++half_move)
+    {
         SCL_Board *board = get_board_internal(record, half_move);
         char *board_state_str = chess_board_to_str(board);
 
-        if ((keys[half_move] = (char *)palloc(strlen(board_state_str) + 1)) != NULL) {
+        if ((keys[half_move] = (char *)palloc(strlen(board_state_str) + 1)) != NULL)
+        {
             strcpy(keys[half_move], board_state_str);
         }
     }
-    *nkeys= total_half_moves;
+    *nkeys = total_half_moves;
     *nullFlags = nulls;
     PG_FREE_IF_COPY(record, 0);
     PG_RETURN_POINTER(keys);
 }
-
 
 PG_FUNCTION_INFO_V1(chess_game_consistent);
 
 Datum chess_game_consistent(PG_FUNCTION_ARGS)
 {
     // Retrieve the array indicating which query keys are present in the indexed value
-    bool *check = (bool *) PG_GETARG_POINTER(0);
+    bool *check = (bool *)PG_GETARG_POINTER(0);
     // Retrieve the strategy number
     uint16 strategy = PG_GETARG_UINT16(1);
     // Query information is not used in this example but can be used for more complex strategies
@@ -593,19 +607,22 @@ Datum chess_game_consistent(PG_FUNCTION_ARGS)
     // Number of keys in the query
     int32 nkeys = PG_GETARG_INT32(3);
     // Extra data passed from the extractQuery function, not used in this example
-    Pointer *extra_data = (Pointer *) PG_GETARG_POINTER(4);
+    Pointer *extra_data = (Pointer *)PG_GETARG_POINTER(4);
     // Pointer to flag indicating whether a recheck is required
-    bool *recheck = (bool *) PG_GETARG_POINTER(5);
-    
-    strategy=1;
+    bool *recheck = (bool *)PG_GETARG_POINTER(5);
+
+    strategy = 1;
 
     // Example: Simple exact matching strategy
-    if (strategy == 1) {
+    if (strategy == 1)
+    {
         // Iterate over each key
-        for (int i = 0; i < nkeys; i++) {
+        for (int i = 0; i < nkeys; i++)
+        {
             // If any of the keys are present, the indexed value is consistent with the query
-            if (check[i]) {
-                *recheck = false;  // No need to recheck as the index test is deemed exact
+            if (check[i])
+            {
+                *recheck = false; // No need to recheck as the index test is deemed exact
                 PG_RETURN_BOOL(true);
             }
         }
