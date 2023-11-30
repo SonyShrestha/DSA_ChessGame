@@ -233,22 +233,6 @@ int compare_strings(char *str1, char *str2)
     }
 }
 
-PG_FUNCTION_INFO_V1(hasOpening);
-Datum hasOpening(PG_FUNCTION_ARGS)
-{
-    SCL_Record *record1 = PG_GETARG_GAME_P(0);
-    SCL_Record *record2 = PG_GETARG_GAME_P(1);
-    char *chess_game_str1;
-    char *chess_game_str2;
-    bool result;
-
-    chess_game_str1 = chess_game_to_str(record1);
-    chess_game_str2 = chess_game_to_str(record2);
-    result = compare_strings(chess_game_str1, chess_game_str2);
-
-    PG_RETURN_BOOL(result);
-}
-
 PG_FUNCTION_INFO_V1(hasBoard);
 Datum hasBoard(PG_FUNCTION_ARGS)
 {
