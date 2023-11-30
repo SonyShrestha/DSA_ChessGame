@@ -19,7 +19,6 @@ CREATE TYPE chess_board (
   internallength = 69, -- 69 is the length of the `board` type from `smallchesslib.h`
   input          = chess_board_in,
   output         = chess_board_out
-  -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, is it useful?
 );
 
 
@@ -34,10 +33,9 @@ CREATE OR REPLACE FUNCTION chess_game_out(chess_game)
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE TYPE chess_game (
-  internallength = 512, -- 69 is the length of the `board` type from `smallchesslib.h`
+  internallength = 512, -- 512 is the length of the `record` type from `smallchesslib.h`
   input          = chess_game_in,
   output         = chess_game_out
-  -- alignment      = double  -- TODO: `alignment` is used in `complex` extension, is it useful?
 );
 
 CREATE FUNCTION getBoard(chess_game, integer)

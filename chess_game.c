@@ -86,7 +86,6 @@ void putCharStr(char c)
     *(s + 1) = 0;
 }
 
-// TODO: trim spaces from end of string?
 char *chess_game_to_str(SCL_Record record)
 {
     char *game = palloc(sizeof(char) * 4096);
@@ -100,7 +99,7 @@ char *chess_game_to_str(SCL_Record record)
     }
 
     str[0] = '\0';
-    // game = str[4096];
+
     return game;
 }
 
@@ -272,9 +271,6 @@ compare_games(SCL_Record *c, SCL_Record *d)
     return strcmp(chess_game_str1, chess_game_str2);
 }
 
-// TODO: update this operation to append `~~` at the end of the second string
-//  so it can be used efficiently in a B-tree index.
-//  see: https://www.richard-towers.com/2023/01/29/finding-the-longest-matching-prefix-in-sql.html
 PG_FUNCTION_INFO_V1(chess_game_lt);
 Datum chess_game_lt(PG_FUNCTION_ARGS)
 {
