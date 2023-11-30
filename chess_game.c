@@ -293,23 +293,6 @@ Datum chess_game_lt(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(result);
 }
 
-// TODO: testing function - remove later
-PG_FUNCTION_INFO_V1(concat_game);
-Datum concat_game(PG_FUNCTION_ARGS)
-{
-    SCL_Record *game_record1 = PG_GETARG_GAME_P(0);
-
-    char *game1_str = chess_game_to_str(game_record1);
-
-    // adds ~~ to the end of the string
-    char *game1_str_concat = palloc(sizeof(char) * strlen(game1_str) + 2 + 1);
-    strcpy(game1_str_concat, game1_str);
-    strcat(game1_str_concat, "~~");
-
-    PG_FREE_IF_COPY(game_record1, 0);
-    PG_RETURN_CSTRING(game1_str_concat);
-}
-
 PG_FUNCTION_INFO_V1(chess_game_le);
 Datum chess_game_le(PG_FUNCTION_ARGS)
 {
