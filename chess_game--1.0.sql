@@ -61,6 +61,11 @@ CREATE FUNCTION hasBoard(chess_game, chess_board,integer)
   AS 'MODULE_PATHNAME', 'hasBoard'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
+-- TODO: testing function to be removed
+CREATE FUNCTION concat_game(chess_game)
+  RETURNS cstring
+  AS 'MODULE_PATHNAME', 'concat_game'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION chess_game_lt(chess_game, chess_game)
   RETURNS boolean

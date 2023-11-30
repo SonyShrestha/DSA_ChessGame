@@ -288,29 +288,19 @@ compare_games(SCL_Record *c, SCL_Record *d)
     return strcmp(chess_game_str1, chess_game_str2);
 }
 
+// TODO: update this operation to append `~~` at the end of the second string
+//  so it can be used efficiently in a B-tree index.
+//  see: https://www.richard-towers.com/2023/01/29/finding-the-longest-matching-prefix-in-sql.html
 PG_FUNCTION_INFO_V1(chess_game_lt);
 Datum chess_game_lt(PG_FUNCTION_ARGS)
 {
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
-    bool result = compare_games(c, d) < 0;
+    char *chess_game_str1 = chess_game_to_str(c);
+    char *chess_game_str2 = chess_game_to_str(d);
 
-    PG_FREE_IF_COPY(c, 0);
-    PG_FREE_IF_COPY(d, 1);
-    PG_RETURN_BOOL(result);
-}
-
-// TODO: update this operation to append `~~` at the end of the second string
-//  so it can be used efficiently in a B-tree index.
-//  see: https://www.richard-towers.com/2023/01/29/finding-the-longest-matching-prefix-in-sql.html
-PG_FUNCTION_INFO_V1(chess_game_le);
-Datum chess_game_le(PG_FUNCTION_ARGS)
-{
-    SCL_Record *c = PG_GETARG_GAME_P(0);
-    SCL_Record *d = PG_GETARG_GAME_P(1);
-
-    bool result = compare_games(c, d) <= 0;
+    bool result = strcmp(chess_game_str1, chess_game_str2) < 0;
 
     PG_FREE_IF_COPY(c, 0);
     PG_FREE_IF_COPY(d, 1);
@@ -332,6 +322,19 @@ Datum concat_game(PG_FUNCTION_ARGS)
 
     PG_FREE_IF_COPY(game_record1, 0);
     PG_RETURN_CSTRING(game1_str_concat);
+}
+
+PG_FUNCTION_INFO_V1(chess_game_le);
+Datum chess_game_le(PG_FUNCTION_ARGS)
+{
+    SCL_Record *c = PG_GETARG_GAME_P(0);
+    SCL_Record *d = PG_GETARG_GAME_P(1);
+
+    bool result = compare_games(c, d) <= 0;
+
+    PG_FREE_IF_COPY(c, 0);
+    PG_FREE_IF_COPY(d, 1);
+    PG_RETURN_BOOL(result);
 }
 
 PG_FUNCTION_INFO_V1(chess_game_eq);
