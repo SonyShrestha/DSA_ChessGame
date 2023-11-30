@@ -298,7 +298,9 @@ Datum chess_game_lt(PG_FUNCTION_ARGS)
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
     char *chess_game_str1 = chess_game_to_str(c);
+
     char *chess_game_str2 = chess_game_to_str(d);
+    strcat(chess_game_str2, "~~");
 
     bool result = strcmp(chess_game_str1, chess_game_str2) < 0;
 
