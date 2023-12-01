@@ -220,6 +220,7 @@ Datum getFirstMoves(PG_FUNCTION_ARGS)
 
 int compare_strings(char *str1, char *str2)
 {
+    printf("Here in compare_strings\n");
     // Check if str1 starts with str2 (ignoring the last character because it's an added *)
     // TODO: remove the -1 since we ignore the * now
     if (strncmp(str1, str2, strlen(str2) - 1) == 0)
@@ -235,6 +236,7 @@ int compare_strings(char *str1, char *str2)
 PG_FUNCTION_INFO_V1(hasBoard);
 Datum hasBoard(PG_FUNCTION_ARGS)
 {
+    printf("Here in hasBoard\n");
     SCL_Record *record = PG_GETARG_GAME_P(0);
     SCL_Board *board = PG_GETARG_BOARD_P(1);
     int half_move = PG_GETARG_INT32(2);
@@ -262,6 +264,7 @@ Datum hasBoard(PG_FUNCTION_ARGS)
 static int
 compare_games(SCL_Record *c, SCL_Record *d)
 {
+    printf("Here in compare_games\n");
     char *chess_game_str1;
     char *chess_game_str2;
 
@@ -274,6 +277,7 @@ compare_games(SCL_Record *c, SCL_Record *d)
 PG_FUNCTION_INFO_V1(chess_game_lt);
 Datum chess_game_lt(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_lt\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -292,6 +296,7 @@ Datum chess_game_lt(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_le);
 Datum chess_game_le(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_le\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -305,6 +310,7 @@ Datum chess_game_le(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_eq);
 Datum chess_game_eq(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_eq\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -318,6 +324,7 @@ Datum chess_game_eq(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_gt);
 Datum chess_game_gt(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_gt\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -331,6 +338,7 @@ Datum chess_game_gt(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_ge);
 Datum chess_game_ge(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_ge\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -344,6 +352,7 @@ Datum chess_game_ge(PG_FUNCTION_ARGS)
 PG_FUNCTION_INFO_V1(chess_game_cmp);
 Datum chess_game_cmp(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_cmp\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -405,6 +414,7 @@ PG_FUNCTION_INFO_V1(chess_move_compare);
 
 Datum chess_move_compare(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_move_compare\n");
     SCL_Record *c = PG_GETARG_GAME_P(0);
     SCL_Record *d = PG_GETARG_GAME_P(1);
 
@@ -425,11 +435,16 @@ PG_FUNCTION_INFO_V1(chess_board_compare);
 
 Datum chess_board_compare(PG_FUNCTION_ARGS)
 {
+    printf("%s",'this is board compare ');
+
     SCL_Board *c = PG_GETARG_BOARD_P(0);
     SCL_Board *d = PG_GETARG_BOARD_P(1);
 
-    char *board1 = chess_board_to_str(c);
-    char *board2 = chess_board_to_str(d);
+    char *board1=chess_board_to_str(c);
+    char *board2=chess_board_to_str(d);
+    
+//    printf("%s",board1);
+//    printf("%s",board2);
 
     int diff = compare_strings(board1, board2);
 
@@ -459,24 +474,25 @@ int countCommas(char *str)
 }
 
 //
-// parses a string of chess game notation, extracts individual moves (ignoring the move numbers),
-// and stores them in an array. This array, along with the count of moves, is then returned.
-// This function is particularly tailored for use in a GIN index, where it would be used to extract
-// indexable elements (the moves) from the stored data (the game notation
+//parses a string of chess game notation, extracts individual moves (ignoring the move numbers), 
+//and stores them in an array. This array, along with the count of moves, is then returned. 
+//This function is particularly tailored for use in a GIN index, where it would be used to extract 
+//indexable elements (the moves) from the stored data (the game notation
 
 PG_FUNCTION_INFO_V1(chess_game_extractQuery);
 
 Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_extractQuery\n");
     SCL_Board *board = PG_GETARG_BOARD_P(0);
-    int32_t *nkeys = (int32_t *)PG_GETARG_POINTER(1);
+    int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
 
-    StrategyNumber strategy = PG_GETARG_UINT16(2);
+	StrategyNumber strategy = PG_GETARG_UINT16(2);
 
-    bool **pmatch = (bool **)PG_GETARG_POINTER(3);
-    Pointer *extra_data = (Pointer *)PG_GETARG_POINTER(4);
-    bool **nullFlags = (bool **)PG_GETARG_POINTER(5);
-    int32 *searchMode = (int32 *)PG_GETARG_POINTER(6);
+	bool   **pmatch = (bool **) PG_GETARG_POINTER(3); 
+	Pointer	   *extra_data = (Pointer *) PG_GETARG_POINTER(4); 
+	bool	  **nullFlags = (bool **) PG_GETARG_POINTER(5);
+	int32	   *searchMode = (int32 *) PG_GETARG_POINTER(6);
 
     *searchMode = GIN_SEARCH_MODE_DEFAULT;
 
@@ -484,7 +500,7 @@ Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
     // char *inputCopy = strdup(query_str);
 
     // int total_boards = countCommas(query_str)+1;
-
+    
     // char *keys = (char **) malloc(total_boards * sizeof(char));
     // int counter = 0;
 
@@ -507,6 +523,7 @@ Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
 
 int count_half_moves(SCL_Record record)
 {
+    printf("Here in count_half_moves\n");
     char *chess_game_str = chess_game_to_str(record);
 
     // Initialize the counter for half-moves
@@ -523,6 +540,8 @@ int count_half_moves(SCL_Record record)
         if (!isdigit(token[0]))
         {
             total_half_moves++;
+//             printf("herein: ");
+//             printf("%d",total_half_moves);
         }
 
         // Get the next token
@@ -537,60 +556,70 @@ PG_FUNCTION_INFO_V1(chess_game_extractValue);
 
 Datum chess_game_extractValue(PG_FUNCTION_ARGS)
 {
+    printf("Here in chess_game_extractValue\n");
     SCL_Record *record = PG_GETARG_GAME_P(0);
-    int32_t *nkeys = (int32_t *)PG_GETARG_POINTER(1);
-    bool **nullFlags = (bool **)PG_GETARG_POINTER(2);
+    int32_t *nkeys = (int32_t *) PG_GETARG_POINTER(1);
+    bool *nullFlags = (bool *) PG_GETARG_POINTER(2);
 
-    char *chess_game_str = chess_game_to_str(record);
     int total_half_moves = count_half_moves(record);
-    char *keys = (char **)palloc(total_half_moves * sizeof(char));
-    bool *nulls;
 
-    for (int half_move = 0; half_move < total_half_moves; ++half_move)
-    {
-        SCL_Board *board = get_board_internal(record, half_move);
-        char *board_state_str = chess_board_to_str(board);
+    // Allocate memory for an array of pointers to SCL_Board
+    Datum *boards = (Datum *) palloc((total_half_moves + 1) * sizeof(Datum));
+    bool *nulls = (bool *) palloc((total_half_moves + 1) * sizeof(bool));
 
-        if ((keys[half_move] = (char *)palloc(strlen(board_state_str) + 1)) != NULL)
-        {
-            strcpy(keys[half_move], board_state_str);
-        }
+    for (int half_move = 0; half_move <= total_half_moves; half_move++) {
+        SCL_Board *board = get_board_internal(*record, half_move);
+
+        // Assuming SCL_Board is a struct, and Datum is used to represent a pointer
+        Datum board_datum = PointerGetDatum(board);
+        boards[half_move] = board_datum;
+
+        nulls[half_move] = false;  // Set null flag as needed
+
+        char *brd_str1 = chess_board_to_str(board);
+        printf("%s\n", brd_str1);
+
+        // Free any temporary memory allocated by chess_board_to_str if needed
+        pfree(brd_str1);
     }
+
     *nkeys = total_half_moves;
     *nullFlags = nulls;
+    fflush(stdout);
+
     PG_FREE_IF_COPY(record, 0);
-    PG_RETURN_POINTER(keys);
+
+    PG_RETURN_POINTER(boards);
 }
+
 
 PG_FUNCTION_INFO_V1(chess_game_consistent);
 
 Datum chess_game_consistent(PG_FUNCTION_ARGS)
 {
+
     // Retrieve the array indicating which query keys are present in the indexed value
-    bool *check = (bool *)PG_GETARG_POINTER(0);
+    bool *check = (bool *) PG_GETARG_POINTER(0);
     // Retrieve the strategy number
     uint16 strategy = PG_GETARG_UINT16(1);
     // Query information is not used in this example but can be used for more complex strategies
     Datum query = PG_GETARG_DATUM(2);
     // Number of keys in the query
-    int32 nkeys = PG_GETARG_INT32(3);
+    int32_t nkeys = PG_GETARG_INT32(3);
     // Extra data passed from the extractQuery function, not used in this example
-    Pointer *extra_data = (Pointer *)PG_GETARG_POINTER(4);
+    Pointer *extra_data = (Pointer *) PG_GETARG_POINTER(4);
     // Pointer to flag indicating whether a recheck is required
-    bool *recheck = (bool *)PG_GETARG_POINTER(5);
-
-    strategy = 1;
+    bool *recheck = (bool *) PG_GETARG_POINTER(5);
+    
+    strategy=1;
 
     // Example: Simple exact matching strategy
-    if (strategy == 1)
-    {
+    if (strategy == 1) {
         // Iterate over each key
-        for (int i = 0; i < nkeys; i++)
-        {
+        for (int i = 0; i < nkeys; i++) {
             // If any of the keys are present, the indexed value is consistent with the query
-            if (check[i])
-            {
-                *recheck = false; // No need to recheck as the index test is deemed exact
+            if (check[i]) {
+                *recheck = false;  // No need to recheck as the index test is deemed exact
                 PG_RETURN_BOOL(true);
             }
         }
