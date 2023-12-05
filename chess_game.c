@@ -40,18 +40,18 @@ Datum chess_board_in(PG_FUNCTION_ARGS)
 }
 
 
-// Input Function for chess_game Data Type
-PG_FUNCTION_INFO_V1(chess_game_in);
-Datum chess_game_in(PG_FUNCTION_ARGS)
+// Output Function for chess_board Data Type
+PG_FUNCTION_INFO_V1(chess_board_out);
+Datum chess_board_out(PG_FUNCTION_ARGS)
 {
-    char *str = PG_GETARG_CSTRING(0);
+    SCL_Board *board = PG_GETARG_BOARD_P(0);
 
-    SCL_Record *record = palloc(sizeof(SCL_Record));
+    char str[256];
 
-    SCL_recordFromPGN(record, str);
+    if (SCL_boardToFEN(board, str) == 0)
+        ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("Invalid Board State")));
 
-    PG_FREE_IF_COPY(str, 0);
-    PG_RETURN_GAME_P(record);
+    PG_RETURN_CSTRING(str);
 }
 
 
@@ -64,21 +64,6 @@ char *chess_board_to_str(SCL_Board board)
     {
         return str;
     }
-}
-
-
-// Output Function for chess_board Data Type
-PG_FUNCTION_INFO_V1(chess_board_out);
-Datum chess_board_out(PG_FUNCTION_ARGS)
-{
-    SCL_Board *board = PG_GETARG_BOARD_P(0);
-
-    char str[256];
-
-    if (SCL_boardToFEN(board, str) == 0)
-        ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("invalid board state")));
-
-    PG_RETURN_CSTRING(str);
 }
 
 
@@ -99,7 +84,6 @@ void putCharStr(char c)
 // Function to convert chess_game to string
 char *chess_game_to_str(SCL_Record record)
 {
-    ereport(WARNING, errmsg_internal("--> FUNCTION chess_game_to_str"));
     char *game = palloc(sizeof(char) * 4096);
     SCL_printPGN(record, putCharStr, 0);
     for (int i = 0; i < 4096; i++)
@@ -113,6 +97,21 @@ char *chess_game_to_str(SCL_Record record)
     str[0] = '\0';
 
     return game;
+}
+
+
+// Input Function for chess_game Data Type
+PG_FUNCTION_INFO_V1(chess_game_in);
+Datum chess_game_in(PG_FUNCTION_ARGS)
+{
+    char *str = PG_GETARG_CSTRING(0);
+
+    SCL_Record *record = palloc(sizeof(SCL_Record));
+
+    SCL_recordFromPGN(record, str);
+
+    PG_FREE_IF_COPY(str, 0);
+    PG_RETURN_GAME_P(record);
 }
 
 
@@ -415,14 +414,15 @@ Datum chess_contains_within_func(PG_FUNCTION_ARGS)
 // Function to compare two chess_board
 PG_FUNCTION_INFO_V1(chess_board_compare);
 Datum chess_board_compare(PG_FUNCTION_ARGS)
-{
+{  
     SCL_Board *c = PG_GETARG_BOARD_P(0);
     SCL_Board *d = PG_GETARG_BOARD_P(1);
 
     char *board1=chess_board_to_str(c);
     char *board2=chess_board_to_str(d);
-    
-    int diff = compare_strings(board1, board2);
+
+    int index1 = strcspn(board2, " ");
+    int diff = strncmp(board1, board2, index1);
 
     int result = 0;
     if (diff < 0)
@@ -480,12 +480,13 @@ Datum chess_game_extractQuery(PG_FUNCTION_ARGS)
     strcpy(board_state1, token);
 
     // Convert string fen to chess_board data type
-    SCL_Board *board = palloc(sizeof(SCL_Board));;
+    SCL_Board *board = palloc(sizeof(SCL_Board));
     SCL_boardFromFEN(board, board_state1);
     boards[0] = PointerGetDatum(board);
 
     *searchMode = GIN_SEARCH_MODE_DEFAULT;
     *nkeys = 1;
+    PG_FREE_IF_COPY(text_str, 0);
     PG_RETURN_POINTER(boards);
 }
 

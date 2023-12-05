@@ -101,21 +101,9 @@ CREATE FUNCTION chess_game_ge(chess_game, chess_game)
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
-CREATE FUNCTION chess_contains_func(chess_game, chess_board)
-  RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_contains_func'
-  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
-
 CREATE FUNCTION chess_contains_within_func(chess_game, text)
   RETURNS boolean
   AS 'MODULE_PATHNAME', 'chess_contains_within_func'
-  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
-
-CREATE FUNCTION chess_equals_func(chess_game, chess_game)
-  RETURNS boolean
-  AS 'MODULE_PATHNAME', 'chess_equals_func'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 
@@ -194,8 +182,11 @@ RETURNS int AS 'MODULE_PATHNAME', 'chess_board_compare'
 LANGUAGE C STRICT;
 
 
-CREATE OPERATOR @@
-(PROCEDURE = chess_contains_within_func, LEFTARG = chess_game, RIGHTARG = text);
+CREATE OPERATOR @@ (
+  PROCEDURE = chess_contains_within_func, 
+  LEFTARG = chess_game, 
+  RIGHTARG = text
+);
 
 
 CREATE OPERATOR CLASS chessgame_ops
