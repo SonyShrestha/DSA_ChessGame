@@ -190,7 +190,7 @@ SET enable_seqscan=ON;
 
 EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasOpening(pgn,'1. e3 b5');
 
-CREATE INDEX idx ON chessgame using btree(pgn);
+CREATE INDEX idx_btree ON chessgame using btree(pgn);
 
 SET enable_seqscan=OFF;
 
@@ -199,11 +199,13 @@ EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasOpening(pgn,'1. e3 b5');
 
 
 ------------------------ Validation of creation of GIN Index -------------------------------
+DROP INDEX idx_btree;
+
 SET enable_seqscan=ON;
 
 EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',10);
 
-CREATE INDEX idx ON chessgame using gin(pgn);
+CREATE INDEX idx_gin ON chessgame using gin(pgn);
 
 -- Not needed though since GIN Index is automatically being picked
 SET enable_seqscan=OFF; 

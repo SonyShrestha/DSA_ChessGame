@@ -182,7 +182,7 @@ RETURNS int AS 'MODULE_PATHNAME', 'chess_board_compare'
 LANGUAGE C STRICT;
 
 
-CREATE OPERATOR @@ (
+CREATE OPERATOR @> (
   PROCEDURE = chess_contains_within_func, 
   LEFTARG = chess_game, 
   RIGHTARG = text
