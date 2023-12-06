@@ -51,4 +51,4 @@ The code is organized in following way for PostgreSQL extensions:
 - DBSA.pptx is the file that was prepared for the purpose of presentation.
 - generateSamplePGN.py is the python script to generate sample chessgame in PGN notation. Number of games required can be modified by changing value of num_games in python script.
 - Makefile is the make orchestrator to easily link all dependencies and compile as required.
-- smallchesslib.h is the header file in which our code depends on for building extension.
+- smallchesslib.h is the header file containing macros and function declaration needed for building chess_game extension.
