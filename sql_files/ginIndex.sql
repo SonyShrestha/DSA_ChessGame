@@ -17,7 +17,7 @@ EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/
                                                                   QUERY PLAN
 ----------------------------------------------------------------------------------------------------------------------------------------------
  Seq Scan on chessgame  (cost=0.00..817.08 rows=5002 width=512) (actual time=601.504..8065.450 rows=3 loops=1)
-   Filter: (pgn @@ concat('10'::character varying, ',', 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'::character varying))
+   Filter: (pgn @> concat('10'::character varying, ',', 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'::character varying))
    Rows Removed by Filter: 9997
  Planning Time: 0.262 ms
  Execution Time: 8065.474 ms
@@ -42,7 +42,7 @@ Output
                                                                        QUERY PLAN
 --------------------------------------------------------------------------------------------------------------------------------------------------------
  Bitmap Heap Scan on chessgame  (cost=66.75..808.75 rows=5000 width=512) (actual time=0.041..0.064 rows=3 loops=1)
-   Recheck Cond: (pgn @@ concat('10'::character varying, ',', 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'::character varying))
+   Recheck Cond: (pgn @> concat('10'::character varying, ',', 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'::character varying))
    Heap Blocks: exact=3
    ->  Bitmap Index Scan on idx  (cost=0.00..65.50 rows=5000 width=0) (actual time=0.035..0.036 rows=3 loops=1)
          Index Cond: (pgn @@ concat('10'::character varying, ',', 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'::character varying))
