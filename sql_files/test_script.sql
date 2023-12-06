@@ -186,22 +186,11 @@ SELECT COUNT(*) FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/8
 
 
 ----------------- Validation of creation of BTree index ------------------------
--- Drop Table if exists
-DROP TABLE IF EXISTS chessgame;
-
--- Create Table chessgame with a column containing chess_game
-CREATE TABLE chessgame(pgn chess_game);
-
--- Load data into chessgame table 
--- sample_pgn10000.csv was generated using python code inside generateSamplePGN.py file
-COPY chessgame(pgn)
-FROM '/mnt/c/ULB/Database Systems Architecture/Project/git/DSA_ChessGame/sample_pgn10000.csv'
-DELIMITER ','
-CSV HEADER;
+SET enable_seqscan=ON;
 
 EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasOpening(pgn,'1. e3 b5');
 
-CREATE INDEX idx ON chessgame(pgn);
+CREATE INDEX idx ON chessgame using btree(pgn);
 
 SET enable_seqscan=OFF;
 
@@ -210,19 +199,7 @@ EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasOpening(pgn,'1. e3 b5');
 
 
 ------------------------ Validation of creation of GIN Index -------------------------------
------------------ Validation of creation of BTree index ------------------------
--- Drop Table if exists
-DROP TABLE IF EXISTS chessgame;
-
--- Create Table chessgame with a column containing chess_game
-CREATE TABLE chessgame(pgn chess_game);
-
--- Load data into chessgame table 
--- sample_pgn10000.csv was generated using python code inside generateSamplePGN.py file
-COPY chessgame(pgn)
-FROM '/mnt/c/ULB/Database Systems Architecture/Project/git/DSA_ChessGame/sample_pgn10000.csv'
-DELIMITER ','
-CSV HEADER;
+SET enable_seqscan=ON;
 
 EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',10);
 
@@ -234,4 +211,4 @@ SET enable_seqscan=OFF;
 EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',10);
 
 -- If board state is initial, it should be present in every chess game
-EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',10);
+EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',10);

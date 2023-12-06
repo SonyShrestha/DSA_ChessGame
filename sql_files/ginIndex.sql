@@ -54,7 +54,7 @@ Output
 
 
 -- If board state is initial, it should be present in every chess game
-EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',10);
+EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasBoard(pgn,'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',10);
 /*
                                                                     QUERY PLAN
 --------------------------------------------------------------------------------------------------------------------------------------------------

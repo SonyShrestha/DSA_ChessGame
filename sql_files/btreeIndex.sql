@@ -24,7 +24,7 @@ EXPLAIN ANALYZE SELECT * FROM chessgame WHERE hasOpening(pgn,'1. e3 b5');
 (5 rows)
 */
 
-CREATE INDEX idx ON chessgame(pgn);
+CREATE INDEX idx ON chessgame using btree(pgn);
 /*
 Output
 CREATE INDEX
