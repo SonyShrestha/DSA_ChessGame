@@ -1,5 +1,5 @@
 # DSA_ChessGame
-Repository for the project of the course DATABASE SYSTEM ARCHITECTURE (INFO-H417) from the program BDMA. Fall 2023.
+Repository for the project of the course DATABASE SYSTEM ARCHITECTURE (INFO-H417) from the program BDMA Fall 2023.
 
 This repository can be accessed [here](https://github.com/SonyShrestha/DSA_ChessGame).
 
@@ -45,10 +45,10 @@ We have written some test scripts that one could be interested in performing wit
 # Code
 The code is organized in following way for PostgreSQL extensions:
 
-- SQL Files inside sql_files folder is for the purpose of testing implementation of extension. Each implementation can be tested seperately or all of them can be tested at once using file test_script.sql
-- chess_game--1.0.sql is the SQL script where the extension is defined, interfacing between PostgreSQL and C
-- chess_game.c is the C file where the functions defined for the extension are implemented
-- DBSA.pptx is the file that was prepared for the purpose of presentation
-- generateSamplePGN.py is the python script to generate sample chessgame in PGN notation. Number of games required can be modified by changing value of - num_games in python script.
-- Makefile is the make orchestrator to easily link all dependencies and compile as required
-- smallchesslib.h is the header file in which our code depends on for building extension
+- SQL Files inside sql_files folder is for the purpose of testing implementation of extension. Each implementation can be tested seperately or all of them can be tested at once using file test_script.sql.
+- chess_game--1.0.sql is the SQL script where the extension is defined, interfacing between PostgreSQL and C.
+- chess_game.c is the C file where the functions defined for the extension are implemented.
+- DBSA.pptx is the file that was prepared for the purpose of presentation.
+- generateSamplePGN.py is the python script to generate sample chessgame in PGN notation. Number of games required can be modified by changing value of num_games in python script.
+- Makefile is the make orchestrator to easily link all dependencies and compile as required.
+- smallchesslib.h is the header file in which our code depends on for building extension.
