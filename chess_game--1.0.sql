@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION hasOpening(game chess_game, opening chess_game)
 CREATE OR REPLACE FUNCTION hasBoard(game chess_game, board chess_board,half_move integer) 
     RETURNS boolean
     AS $$
-        select game @@ CONCAT(half_move::VARCHAR,',',board::VARCHAR);
+        select game @> CONCAT(half_move::VARCHAR,',',board::VARCHAR);
     $$
     LANGUAGE sql;  
 
