@@ -18,14 +18,16 @@ This project involves developing extension in Postgres, with following implement
 
 <br /><br />
 Group members
-1. Sony Shrestha
-2. Aayush Paudel 
-3. Hadi El Yakhni
-4. Iyoha Peace Osamuyi
+1. [Sony Shrestha](https://github.com/SonyShrestha)
+2. [Aayush Paudel](https://github.com/Aayush360) 
+3. [Hadi El Yakhni](https://github.com/hadielyakhni)
+4. [Iyoha Peace Osamuyi](https://github.com/Pce-iyos)
 
 <br />
-Professor: Sakr, Mahmoud
-<br />
+Professors
+
+1. Sakr Mahmoud<br />
+2. Schoemans Maxime<br />
 <br />
 <br />
 
@@ -34,7 +36,8 @@ Professor: Sakr, Mahmoud
 To create extension follow following steps: 
 
 ``$ sudo make install``
-``$ psql [user] -c ``
+``$ psql [user]``
+``DROP EXTENSION IF EXISTS chess_game CASCADE;``
 ``CREATE EXTENSION chess_game;``
 
 We have written some test scripts that one could be interested in performing with this extension, you can execute them by running:
