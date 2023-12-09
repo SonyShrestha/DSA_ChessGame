@@ -582,8 +582,8 @@ Datum chess_game_consistent(PG_FUNCTION_ARGS)
     // No keys matched, or for other unhandled strategies, return false
     *recheck = false;
     PG_FREE_IF_COPY(check, 0);
-    PG_FREE_IF_COPY(strategy, 1);
-    PG_FREE_IF_COPY(query, 2);
+    //PG_FREE_IF_COPY(strategy, 1);
+    //PG_FREE_IF_COPY(query, 2);
     PG_FREE_IF_COPY(extra_data,4);
     PG_FREE_IF_COPY(recheck,5);
     PG_RETURN_BOOL(false);
